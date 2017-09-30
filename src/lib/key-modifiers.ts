@@ -28,23 +28,22 @@ export const shiftKey$ = keyModifiers$.map(mods => mods.shift)
 import { addCleanup } from './cleanup';
 export function initKeyListener() { // legacy
   const keysObj = {
-    ctrl: false,
     alt: false,
+    ctrl: false,
     shift: false,
   };
 
-  document.addEventListener('keydown', keyEvent);
-  document.addEventListener('keyup', keyEvent);
+  const sub = xs.combine(altKey$, ctrlKey$, shiftKey$)
+    .map(([alt, ctrl, shift]) => ({ alt, ctrl, shift }))
+    .subscribe({
+      next: (mods) => Object.assign(keysObj, mods),
+      error: err => console.error('initKeyListener', err),
+      complete: () => console.debug('initKeyListener completed'),
+    });
+
   addCleanup(() => {
-    document.removeEventListener('keydown', keyEvent);
-    document.removeEventListener('keyup', keyEvent);
+    sub.unsubscribe();
   });
 
   return keysObj;
-
-  function keyEvent(ev: KeyboardEvent) {
-    keysObj.ctrl = ev.ctrlKey;
-    keysObj.alt = ev.altKey;
-    keysObj.shift = ev.shiftKey;
-  }
 }
