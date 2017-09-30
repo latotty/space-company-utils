@@ -1,0 +1,60 @@
+{
+  "name": "space-company-utils",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "cycle-restart": "^0.2.2",
+    "progress-bar-webpack-plugin": "^1.10.0",
+    "@types/mocha": "^2.2.41",
+    "@types/webpack-env": "^1.13.0",
+    "@webpack-blocks/dev-server2": "^0.4.0",
+    "@webpack-blocks/extract-text2": "^0.4.0",
+    "@webpack-blocks/postcss": "^0.4.3",
+    "@webpack-blocks/sass": "^0.4.1",
+    "@webpack-blocks/tslint": "^0.4.0",
+    "@webpack-blocks/typescript": "^0.4.1",
+    "@webpack-blocks/webpack2": "^0.4.0",
+    "autoprefixer": "^7.1.1",
+    "babel-core": "^6.25.0",
+    "babel-plugin-istanbul": "^4.1.4",
+    "chalk": "^2.0.1",
+    "clean-webpack-plugin": "^0.1.16",
+    "copy-webpack-plugin": "^4.0.1",
+    "cross-env": "^5.0.1",
+    "html-webpack-plugin": "^2.29.0",
+    "ifdef-loader": "^1.1.1",
+    "mocha": "^3.4.2",
+    "mocha-webpack": "^0.7.0",
+    "node-sass": "^4.5.3",
+    "nyc": "^11.0.3",
+    "rimraf": "^2.6.1",
+    "snabbdom-pragma": "^2.4.0",
+    "typescript": "2.4.x",
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.5.0",
+    "webpack-node-externals": "^1.6.0"
+  },
+  "dependencies": {
+    "@cycle/dom": "^18.0.0",
+    "@cycle/isolate": "^3.0.0",
+    "@cycle/run": "^3.1.0",
+    "cycle-onionify": "^3.3.0",
+    "xstream": "^10.9.0"
+  },
+  "scripts": {
+    "start": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.js",
+    "test": "exit 0",
+    "test:disabled": "cross-env NODE_ENV=test nyc mocha-webpack --timeout=100000 --colors --webpack-config configs/webpack.config.test.js test/**/*.test.*",
+    "build": "cross-env NODE_ENV=production webpack --config configs/webpack.config.js",
+    "clean": "rimraf build .tmp .nyc_output coverage"
+  },
+  "nyc": {
+    "include": [
+      "src"
+    ],
+    "reporter": [
+      "html",
+      "text-summary"
+    ]
+  }
+}
