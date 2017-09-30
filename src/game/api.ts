@@ -22,6 +22,12 @@ export const resourceTypes: ResourceType[] = [
   'ice', 'meteorite', 'science', 'rocketFuel',
 ];
 
+export const resourceTabSideBarResources: ResourceType[] = [
+  'plasma', 'energy', 'uranium', 'lava', 'oil', 'metal', 'gem',
+  'charcoal', 'wood', 'silicon', 'lunarite', 'methane', 'titanium',
+  'gold', 'silver', 'hydrogen', 'helium', 'ice', 'meteorite',
+];
+
 export function getResource(type: ResourceType): number {
   return gameWindow.Game.resources.getResource(type);
 }
@@ -141,4 +147,14 @@ export function getResourceTypeFromId(id: string): ResourceType {
     case 'fuel': return 'rocketFuel';
     default: return type as ResourceType;
   }
+}
+
+export function getResourceTabRowByType(type: ResourceType) {
+  const rowId = `${type}Nav`;
+  const $resourceNavParent = document.getElementById('resourceNavParent')!;
+  const $row = $resourceNavParent.querySelector(`#${rowId}`);
+  if (!$row) {
+    throw new Error(`getResourceTabRowByType cannot find ${type}`);
+  }
+  return $row as HTMLTableRowElement;
 }

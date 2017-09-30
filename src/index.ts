@@ -5,6 +5,9 @@ import {
 import { toHHMMSS, capitalizeFirstLetter } from './lib/utils';
 import { addCleanup } from './lib/cleanup';
 import { initKeyListener } from './lib/key-modifiers';
+import { init as initResourceProgressBar } from './resource-progress-bar';
+
+initResourceProgressBar();
 
 const keys = initKeyListener();
 
