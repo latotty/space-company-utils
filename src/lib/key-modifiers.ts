@@ -24,26 +24,3 @@ export const ctrlKey$ = keyModifiers$.map(mods => mods.ctrl)
 export const shiftKey$ = keyModifiers$.map(mods => mods.shift)
   .compose(dropRepeats())
   .remember();
-
-import { addCleanup } from './cleanup';
-export function initKeyListener() { // legacy
-  const keysObj = {
-    alt: false,
-    ctrl: false,
-    shift: false,
-  };
-
-  const sub = xs.combine(altKey$, ctrlKey$, shiftKey$)
-    .map(([alt, ctrl, shift]) => ({ alt, ctrl, shift }))
-    .subscribe({
-      next: (mods) => Object.assign(keysObj, mods),
-      error: err => console.error('initKeyListener', err),
-      complete: () => console.debug('initKeyListener completed'),
-    });
-
-  addCleanup(() => {
-    sub.unsubscribe();
-  });
-
-  return keysObj;
-}

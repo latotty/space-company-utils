@@ -1,10 +1,12 @@
+import xs from 'xstream';
+
 import {
   ResourceType, getResource, getStorage, getProduction, getResourceEmc,
   getDysonAmount, getDysonCost, format, getCost, getResourceTypeFromId
 } from '../game';
 import { toHHMMSS, capitalizeFirstLetter } from '../lib/utils';
 import { addCleanup } from '../lib/cleanup';
-import { initKeyListener } from '../lib/key-modifiers';
+import { altKey$, ctrlKey$, shiftKey$ } from '../lib/key-modifiers';
 
 export function init() {
   const keys = initKeyListener();
@@ -177,4 +179,26 @@ export function init() {
       ps: getProduction(type),
     };
   }
+}
+
+function initKeyListener() { // legacy
+  const keysObj = {
+    alt: false,
+    ctrl: false,
+    shift: false,
+  };
+
+  const sub = xs.combine(altKey$, ctrlKey$, shiftKey$)
+    .map(([alt, ctrl, shift]) => ({ alt, ctrl, shift }))
+    .subscribe({
+      next: (mods) => Object.assign(keysObj, mods),
+      error: err => console.error('initKeyListener', err),
+      complete: () => console.debug('initKeyListener completed'),
+    });
+
+  addCleanup(() => {
+    sub.unsubscribe();
+  });
+
+  return keysObj;
 }
