@@ -1,23 +1,10 @@
 import {
   ResourceType, getResource, getStorage, getProduction, getResourceEmc,
   getDysonAmount, getDysonCost, format, getCost, getResourceTypeFromId
-} from './api';
-import { toHHMMSS, capitalizeFirstLetter } from './utils';
-
-declare global {
-  interface Window {
-    cleanupSpaceCompanyRemainingScript?: Function;
-  }
-}
-
-if (window.cleanupSpaceCompanyRemainingScript) {
-  window.cleanupSpaceCompanyRemainingScript();
-}
-window.cleanupSpaceCompanyRemainingScript = cleanup;
-const cleanupFns: Function[] = [];
-function cleanup() {
-  cleanupFns.forEach(fn => fn());
-}
+} from './game';
+import { toHHMMSS, capitalizeFirstLetter } from './lib/utils';
+import { addCleanup } from './lib/cleanup';
+import { initKeyListener } from './lib/key-modifiers';
 
 const keys = initKeyListener();
 
@@ -64,7 +51,7 @@ function initDysonUi(amount: number) {
       ${ renderCostPart(cost.ice, 'ice') }.`;
   }, 500);
 
-  cleanupFns.push(() => {
+  addCleanup(() => {
     span.remove();
     clearInterval(tid);
   });
@@ -160,7 +147,7 @@ function initCostUi($el: HTMLElement) {
     span.innerHTML = getCostTipTextWithId(id);
   }, 500);
 
-  cleanupFns.push(() => {
+  addCleanup(() => {
     span.remove();
     clearInterval(tid);
   });
@@ -188,27 +175,4 @@ function getResourceValue(type: ResourceType) {
     emcVal: getResourceEmc(type),
     ps: getProduction(type),
   };
-}
-
-function initKeyListener() {
-  const keysObj = {
-    ctrl: false,
-    alt: false,
-    shift: false,
-  };
-
-  document.addEventListener('keydown', keyEvent);
-  document.addEventListener('keyup', keyEvent);
-  cleanupFns.push(() => {
-    document.removeEventListener('keydown', keyEvent);
-    document.removeEventListener('keyup', keyEvent);
-  });
-
-  return keysObj;
-
-  function keyEvent(ev: KeyboardEvent) {
-    keysObj.ctrl = ev.ctrlKey;
-    keysObj.alt = ev.altKey;
-    keysObj.shift = ev.shiftKey;
-  }
 }

@@ -1,78 +1,9 @@
-import { capitalizeFirstLetter } from './utils';
+import { TechType, ResourceType, TechData } from './game.interface';
+import { capitalizeFirstLetter } from '../lib/utils';
 
-declare global {
-  interface Window {
-    Game: Game;
+import { GameWindow } from './game-window.interface';
 
-    getCost(basePrice: number, amount: number, multiplier?: number): number;
-
-    dyson: number;
-
-    storagePrice: number;
-  }
-}
-
-interface Game {
-  resources: GameResources;
-  settings: GameSettings;
-  tech: GameTech;
-}
-
-interface GameResources {
-  getResource(type: ResourceType): number;
-  getStorage(type: ResourceType): number;
-  getProduction(type: ResourceType): number;
-}
-
-interface GameSettings {
-  format(num: number): string;
-}
-
-interface GameTech {
-  getTechData(techType: TechType): TechData;
-}
-
-export interface TechData {
-  current: number;
-  cost: Partial<ResourceCost>;
-}
-
-export interface ResourceCost {
-  energy: number;
-  plasma: number;
-  uranium: number;
-  lava: number;
-  oil: number;
-  metal: number;
-  gem: number;
-  charcoal: number;
-  wood: number;
-  silicon: number;
-  lunarite: number;
-  methane: number;
-  titanium: number;
-  gold: number;
-  silver: number;
-  hydrogen: number;
-  helium: number;
-  ice: number;
-  meteorite: number;
-  science: number;
-  rocketFuel: number;
-}
-
-export type TechType = 'unlockStorage' | 'unlockBasicEnergy' | 'unlockOil' | 'unlockSolar' |
-  'unlockMachines' | 'unlockDestruction' | 'unlockSolarSystem' | 'unlockRocketFuelT2' | 'unlockRocketFuelT3' |
-  'unlockLabT2' | 'unlockLabT3' | 'unlockLabT4' | 'unlockBatteries' | 'unlockBatteriesT2' | 'unlockBatteriesT3' |
-  'unlockBatteriesT4' | 'unlockPlasma' | 'unlockPlasmaTier2' | 'unlockPSU' | 'unlockPSUT2' | 'unlockEmc' |
-  'unlockMeteorite' | 'unlockMeteoriteTier1' | 'unlockMeteoriteTier2' | 'unlockDyson' | 'unlockDysonSphere' |
-  'upgradeResourceTech' | 'upgradeEngineTech' | 'upgradeSolarTech' | 'efficiencyResearch' |
-  'scienceEfficiencyResearch' | 'energyEfficiencyResearch' | 'batteryEfficiencyResearch';
-
-export type ResourceType = 'energy' | 'plasma' | 'uranium' | 'lava' | 'oil' |
-  'metal' | 'gem' | 'charcoal' | 'wood' | 'silicon' | 'lunarite' |
-  'methane' | 'titanium' | 'gold' | 'silver' | 'hydrogen' | 'helium' |
-  'ice' | 'meteorite' | 'science' | 'rocketFuel';
+export const gameWindow: GameWindow = window as any as GameWindow; // type hack
 
 export const techTypes: TechType[] = [
   'unlockStorage', 'unlockBasicEnergy', 'unlockOil', 'unlockSolar',
@@ -92,35 +23,35 @@ export const resourceTypes: ResourceType[] = [
 ];
 
 export function getResource(type: ResourceType): number {
-  return window.Game.resources.getResource(type);
+  return gameWindow.Game.resources.getResource(type);
 }
 
 export function getStorage(type: ResourceType): number {
-  return window.Game.resources.getStorage(type);
+  return gameWindow.Game.resources.getStorage(type);
 }
 
 export function getProduction(type: ResourceType): number {
-  return window.Game.resources.getProduction(type);
+  return gameWindow.Game.resources.getProduction(type);
 }
 
 export function getResourceEmc(type: ResourceType): number {
-  return (window as any)[type + 'EmcVal'];
+  return (gameWindow as any)[type + 'EmcVal'];
 }
 
 export function getStoragePrice() {
-  return window.storagePrice;
+  return gameWindow.storagePrice;
 }
 
 export function getDysonAmount() {
-  return window.dyson;
+  return gameWindow.dyson;
 }
 
 export function getTechData(type: TechType): TechData {
-  return window.Game.tech.getTechData(type);
+  return gameWindow.Game.tech.getTechData(type);
 }
 
 export function getTechCost(cost: number, currentLevel: number): number {
-  return window.getCost(cost, currentLevel);
+  return gameWindow.getCost(cost, currentLevel);
 }
 
 export function getDysonCost(lvl: number) {
@@ -138,7 +69,7 @@ export function getDysonCost(lvl: number) {
   };
 }
 
-export function format(num: number) { return window.Game.settings.format(num); }
+export function format(num: number) { return gameWindow.Game.settings.format(num); }
 
 export function getCost(id: string) {
   const type = getResourceTypeFromId(id);
@@ -184,7 +115,7 @@ export function getCost(id: string) {
   if (id.includes('Research')) {
     const tech = getTechData(id.replace('Cost', '') as TechType);
     if (!tech) { console.error(id, type); }
-    return tech && window.getCost(tech.cost.science!, tech.current) || 0;
+    return tech && gameWindow.getCost(tech.cost.science!, tech.current) || 0;
   }
   if ((window as any)[id] instanceof Element) {
     return 0;
