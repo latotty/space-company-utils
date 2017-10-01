@@ -60,21 +60,6 @@ export function getTechCost(cost: number, currentLevel: number): number {
   return gameWindow.getCost(cost, currentLevel);
 }
 
-export function getDysonCost(lvl: number) {
-  const dysonTitaniumCost = Math.floor(300000 * Math.pow(1.02,lvl));
-  const dysonGoldCost = Math.floor(100000 * Math.pow(1.02,lvl));
-  const dysonSiliconCost = Math.floor(200000 * Math.pow(1.02,lvl));
-  const dysonMeteoriteCost = Math.floor(1000 * Math.pow(1.02,lvl));
-  const dysonIceCost = Math.floor(100000 * Math.pow(1.02,lvl));
-  return {
-    titanium: dysonTitaniumCost,
-    gold: dysonGoldCost,
-    silicon: dysonSiliconCost,
-    meteorite: dysonMeteoriteCost,
-    ice: dysonIceCost,
-  };
-}
-
 export function format(num: number) { return gameWindow.Game.settings.format(num); }
 
 export function getCost(id: string) {

@@ -2,11 +2,13 @@ import xs from 'xstream';
 
 import {
   ResourceType, getResource, getStorage, getProduction, getResourceEmc,
-  getDysonAmount, getDysonCost, format, getCost, getResourceTypeFromId
+  getDysonAmount, format, getCost, getResourceTypeFromId
 } from '../game';
+import { getDysonCost } from '../game/game-cost';
 import { toHHMMSS, capitalizeFirstLetter } from '../lib/utils';
 import { addCleanup } from '../lib/cleanup';
 import { altKey$, ctrlKey$, shiftKey$ } from '../lib/key-modifiers';
+import { insertAfterHTMLElement } from '../lib/insert-after-html-element';
 
 export function init() {
   const keys = initKeyListener();
@@ -25,7 +27,7 @@ export function init() {
 
     const span = createSpan();
 
-    insertAfter(span, $prevEl);
+    insertAfterHTMLElement(span, $prevEl);
 
     const tid = setInterval(() => {
       const cost = (Array.from(Array(Math.max(amount - getDysonAmount(), 0))) as number[]).reduce((state, _, index) => {
@@ -144,7 +146,7 @@ export function init() {
 
     const span = createSpan();
 
-    insertAfter(span, $el);
+    insertAfterHTMLElement(span, $el);
 
     const tid = setInterval(() => {
       span.innerHTML = getCostTipTextWithId(id);
@@ -154,17 +156,6 @@ export function init() {
       span.remove();
       clearInterval(tid);
     });
-  }
-
-  function insertAfter(newElement: HTMLElement, targetElement: HTMLElement) {
-    const parent = targetElement.parentNode;
-    if (!parent) { throw new Error('no parent'); }
-
-    if (parent.lastChild === targetElement) {
-      parent.appendChild(newElement);
-    } else {
-      parent.insertBefore(newElement, targetElement.nextSibling);
-    }
   }
 
   function createSpan() {

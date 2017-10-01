@@ -13,7 +13,8 @@ interface ResourceStreams {
 
 const timer$ = xs.periodic(25);
 
-export const resources: AllResources<ResourceStreams> = resourceTypes.reduce<AllResources<ResourceStreams>>((state, type) => {
+export type AllResourceStreams = AllResources<ResourceStreams>;
+export const allResourceStreams: AllResourceStreams = resourceTypes.reduce<AllResourceStreams>((state, type) => {
   return {
     ...state,
     [type]: getResourceStream(type, timer$),

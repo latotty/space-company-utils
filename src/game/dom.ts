@@ -15,3 +15,7 @@ export function getResourceSidebarRowImages(): HTMLImageElement[] {
     document.querySelectorAll('#resourceNavParent tr td:first-child img')
   ) as HTMLImageElement[];
 }
+
+export function getDysonUiSphereBlock(): HTMLElement {
+  return document.querySelector('#dysonSphere') as HTMLElement;
+}

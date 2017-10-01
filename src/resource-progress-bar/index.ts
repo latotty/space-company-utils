@@ -1,7 +1,7 @@
 import xs from 'xstream';
 import dropRepeats from 'xstream/extra/dropRepeats';
 
-import { ResourceType, resources, resourceTabSideBarResources } from '../game';
+import { ResourceType, allResourceStreams, resourceTabSideBarResources } from '../game';
 import { getResourceTabRowByType, getResourceSidebarRowImages } from '../game/dom';
 import { addCleanup } from '../lib/cleanup';
 
@@ -25,7 +25,7 @@ function applySidebarImageHeightFix() {
 }
 
 function initResourceProgressBar(type: ResourceType) {
-  const percent$ = xs.combine(resources[type].storage$, resources[type].amount$)
+  const percent$ = xs.combine(allResourceStreams[type].storage$, allResourceStreams[type].amount$)
     .map(([storage, amount]) => {
       if (storage <= 0 || amount <= 0) {
         return 0;
