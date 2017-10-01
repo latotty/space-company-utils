@@ -3,7 +3,7 @@ import { VNode, DOMSource } from '@cycle/dom';
 import { StateSource } from 'cycle-onionify';
 
 import { DysonCostResources, ResourceType } from '../game/game.interface';
-import { AllResourceStreams } from '../game/game-resources';
+import { AllResourceStreams } from '../game/resources';
 import { getValueRatios, capitalizeFirstLetter, getPercent } from '../lib/utils';
 
 export interface Sources {
@@ -114,7 +114,7 @@ function model(actions: Actions): Stream<Reducer> {
 function view(state$: Stream<State>): Stream<VNode> {
   return state$.map(({ currentProductionRatios, dysonCostRatios, worstProduction }) =>
     <div>
-      <h3 className="default btn-link">Dyson ratio</h3>
+      <h3 className="default btn-link">Dyson stats</h3>
       <div>
         Current ratios: { listRatios(currentProductionRatios, worstProduction) }
       </div>

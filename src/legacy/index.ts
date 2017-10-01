@@ -1,10 +1,11 @@
 import xs from 'xstream';
 
 import {
-  ResourceType, getResource, getStorage, getProduction, getResourceEmc,
+  getResource, getStorage, getProduction, getResourceEmc,
   getDysonAmount, format, getCost, getResourceTypeFromId
-} from '../game';
-import { getDysonCost } from '../game/game-cost';
+} from '../game/api';
+import { ResourceType } from '../game/game.interface';
+import { getDysonCost } from '../game/cost';
 import { toHHMMSS, capitalizeFirstLetter } from '../lib/utils';
 import { addCleanup } from '../lib/cleanup';
 import { altKey$, ctrlKey$, shiftKey$ } from '../lib/key-modifiers';

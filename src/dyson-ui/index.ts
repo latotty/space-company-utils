@@ -2,9 +2,9 @@ import { run } from '@cycle/run';
 import onionify from 'cycle-onionify';
 import { makeDOMDriver } from '@cycle/dom';
 
-import { getDysonUiSphereBlock } from '../game/dom';
-import { allResourceStreams, AllResourceStreams } from '../game/game-resources';
-import { dysonCostRatios$ } from '../game/game-cost';
+import { getDysonTabSphereBlock } from '../game/dom';
+import { allResourceStreams, AllResourceStreams } from '../game/resources';
+import { dysonCostRatios$ } from '../game/cost';
 
 import { insertAfterHTMLElement } from '../lib/insert-after-html-element';
 import { addCleanup } from '../lib/cleanup';
@@ -12,15 +12,15 @@ import { addCleanup } from '../lib/cleanup';
 import { App } from './app';
 
 export function init() {
-  const uiBlock = document.createElement('div');
-  const { cleanup: cleanupCycleApp } = initCycleApp(uiBlock, allResourceStreams);
+  const containerDiv = document.createElement('div');
+  const { cleanup: cleanupCycleApp } = initCycleApp(containerDiv, allResourceStreams);
 
-  const dysonUiSphereBlock = getDysonUiSphereBlock();
-  insertAfterHTMLElement(uiBlock, dysonUiSphereBlock);
+  const dysonUiSphereBlock = getDysonTabSphereBlock();
+  insertAfterHTMLElement(containerDiv, dysonUiSphereBlock);
 
   addCleanup(() => {
     cleanupCycleApp();
-    uiBlock.remove();
+    containerDiv.remove();
   });
 }
 

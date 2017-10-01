@@ -16,6 +16,6 @@ export function getResourceSidebarRowImages(): HTMLImageElement[] {
   ) as HTMLImageElement[];
 }
 
-export function getDysonUiSphereBlock(): HTMLElement {
+export function getDysonTabSphereBlock(): HTMLElement {
   return document.querySelector('#dysonSphere') as HTMLElement;
 }

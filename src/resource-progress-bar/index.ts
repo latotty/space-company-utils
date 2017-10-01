@@ -1,7 +1,9 @@
 import xs from 'xstream';
 import dropRepeats from 'xstream/extra/dropRepeats';
 
-import { ResourceType, allResourceStreams, resourceTabSideBarResources } from '../game';
+import { ResourceType } from '../game/game.interface';
+import { resourceTabSideBarResources } from '../game/api';
+import { allResourceStreams } from '../game/resources';
 import { getResourceTabRowByType, getResourceSidebarRowImages } from '../game/dom';
 import { addCleanup } from '../lib/cleanup';
 
