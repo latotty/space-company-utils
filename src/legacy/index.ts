@@ -5,7 +5,7 @@ import {
   getDysonAmount, format, getCost, getResourceTypeFromId
 } from '../game/api';
 import { ResourceType } from '../game/game.interface';
-import { getDysonCost } from '../game/cost';
+import { getDysonSegmentCost } from '../game/cost';
 import { toHHMMSS, capitalizeFirstLetter } from '../lib/utils';
 import { addCleanup } from '../lib/cleanup';
 import { altKey$, ctrlKey$, shiftKey$ } from '../lib/key-modifiers';
@@ -33,7 +33,7 @@ export function init() {
     const tid = setInterval(() => {
       const cost = (Array.from(Array(Math.max(amount - getDysonAmount(), 0))) as number[]).reduce((state, _, index) => {
         const lvl = index + getDysonAmount();
-        const subCost = getDysonCost(lvl);
+        const subCost = getDysonSegmentCost(lvl);
         return {
           titanium: state.titanium + subCost.titanium,
           gold: state.gold + subCost.gold,

@@ -3,6 +3,7 @@ import dropRepeats from 'xstream/extra/dropRepeats';
 
 import { getResource, getProduction, getResourceEmc, getStorage, resourceTypes } from './api';
 import { ResourceType, AllResources } from './game.interface';
+import { updateTimer$ } from '../lib/update-timer';
 
 interface ResourceStreams {
   amount$: xs<number>;
@@ -11,13 +12,11 @@ interface ResourceStreams {
   storage$: xs<number>;
 }
 
-const timer$ = xs.periodic(25);
-
 export type AllResourceStreams = AllResources<ResourceStreams>;
 export const allResourceStreams: AllResourceStreams = resourceTypes.reduce<AllResourceStreams>((state, type) => {
   return {
     ...state,
-    [type]: getResourceStream(type, timer$),
+    [type]: getResourceStream(type, updateTimer$),
   };
 }, {} as any);
 

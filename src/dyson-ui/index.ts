@@ -4,7 +4,7 @@ import { makeDOMDriver } from '@cycle/dom';
 
 import { getDysonTabSphereBlock } from '../game/dom';
 import { allResourceStreams, AllResourceStreams } from '../game/resources';
-import { dysonCostRatios$ } from '../game/cost';
+import { dysonCosts } from '../game/cost';
 
 import { insertAfterHTMLElement } from '../lib/insert-after-html-element';
 import { addCleanup } from '../lib/cleanup';
@@ -30,7 +30,7 @@ function initCycleApp(target: HTMLElement, allResourceStreams: AllResourceStream
   const drivers = {
     DOM: makeDOMDriver(target),
     allResourceStreams: () => allResourceStreams,
-    dysonCostRatios$: () => dysonCostRatios$,
+    dysonCosts: () => dysonCosts,
   };
   const dispose = run(main as any, drivers);
 
