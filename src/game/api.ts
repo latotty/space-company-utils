@@ -148,13 +148,3 @@ export function getResourceTypeFromId(id: string): ResourceType {
     default: return type as ResourceType;
   }
 }
-
-export function getResourceTabRowByType(type: ResourceType) {
-  const rowId = `${type}Nav`;
-  const $resourceNavParent = document.getElementById('resourceNavParent')!;
-  const $row = $resourceNavParent.querySelector(`#${rowId}`);
-  if (!$row) {
-    throw new Error(`getResourceTabRowByType cannot find ${type}`);
-  }
-  return $row as HTMLTableRowElement;
-}

@@ -1,13 +1,27 @@
 import xs from 'xstream';
 import dropRepeats from 'xstream/extra/dropRepeats';
 
-import { ResourceType, resources, getResourceTabRowByType, resourceTabSideBarResources } from '../game';
+import { ResourceType, resources, resourceTabSideBarResources } from '../game';
+import { getResourceTabRowByType, getResourceSidebarRowImages } from '../game/dom';
 import { addCleanup } from '../lib/cleanup';
 
 export function init() {
   resourceTabSideBarResources.forEach((type: ResourceType) => {
     initResourceProgressBar(type);
   });
+  const { cleanup: sidebarImageHeightFixCleanup } = applySidebarImageHeightFix();
+
+  addCleanup(sidebarImageHeightFixCleanup);
+}
+
+function applySidebarImageHeightFix() {
+  const $$elements = getResourceSidebarRowImages();
+  const forCleanup = $$elements.map(e => ({ e, height: e.style.height }));
+  $$elements.forEach(e => e.style.height = '30px');
+
+  return {
+    cleanup: () => forCleanup.forEach(({ e, height }) => e.style.height = height),
+  };
 }
 
 function initResourceProgressBar(type: ResourceType) {
