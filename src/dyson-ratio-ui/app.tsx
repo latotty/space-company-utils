@@ -12,21 +12,25 @@ export interface Sources {
   dysonCostRatios$: xs<DysonCostResources<number>>;
   onion: StateSource<State>;
 }
+
 export interface Sinks {
   DOM: Stream<VNode>;
   onion: Stream<Reducer>;
 }
+
 export interface Reducer {
   (prev: State): State;
 }
+
 export interface State {
-  currentProductionRatios: DysonCostResources<number>,
-  dysonCostRatios: DysonCostResources<number>,
-  worstProduction?: ResourceType,
+  currentProductionRatios: DysonCostResources<number>;
+  dysonCostRatios: DysonCostResources<number>;
+  worstProduction?: ResourceType;
 }
+
 export interface Actions {
-  currentProductionRatiosChange$: xs<DysonCostResources<number>>,
-  dysonCostRatiosChange$: xs<DysonCostResources<number>>,
+  currentProductionRatiosChange$: xs<DysonCostResources<number>>;
+  dysonCostRatiosChange$: xs<DysonCostResources<number>>;
 }
 
 export function App(sources: Sources): Sinks {
@@ -133,7 +137,7 @@ function listRatios(ratios: DysonCostResources<number>, worstProduction?: string
   const ratioKeys = Object.keys(ratios);
   return ratioKeys.map((type, i) => (
     <span>
-      <span style={ { color: type === worstProduction ? 'red': '' } }>
+      <span style={ { color: type === worstProduction ? 'red' : '' } }>
         { i > 0 ? ' ' : '' }
         { (ratios as any)[type] } { capitalizeFirstLetter(type) }
       </span>

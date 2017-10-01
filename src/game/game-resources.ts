@@ -19,7 +19,7 @@ export const allResourceStreams: AllResourceStreams = resourceTypes.reduce<AllRe
     ...state,
     [type]: getResourceStream(type, timer$),
   };
-}, {} as any)
+}, {} as any);
 
 function getResourceStream(type: ResourceType, trigger$ = xs.periodic(25)) {
   const amount$ = trigger$
