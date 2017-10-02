@@ -3,10 +3,10 @@ import { VNode, DOMSource } from '@cycle/dom';
 import { StateSource } from 'cycle-onionify';
 
 import { format } from '../game/api';
-import { DysonCostResources, ResourceType } from '../game/game.interface';
+import { DysonCostResources, ResourceType, DysonContructions } from '../game/game.interface';
 import { AllResourceStreams } from '../game/resources';
-import { DysonCosts } from '../game/cost';
-import { getValueRatios, capitalizeFirstLetter, getPercent } from '../lib/utils';
+import { DysonCosts, getProduceTimeSecForCost, DysonContructionCosts } from '../game/cost';
+import { getValueRatios, capitalizeFirstLetter, getPercent, toHHMMSS } from '../lib/utils';
 
 export interface Sources {
   DOM: DOMSource;
@@ -29,16 +29,26 @@ export interface State {
   currentProductionRatios: DysonCostResources<number>;
   dysonCostRatios: DysonCostResources<number>;
   worstProduction?: ResourceType;
+  dysonContructions: DysonContructions<DysonContructionsState>;
+}
+
+interface DysonContructionsState {
+  totalCost: DysonCostResources<number>;
+  currentCost: DysonCostResources<number>;
+  totalProduceTimeSec: DysonCostResources<number>;
+  currentProduceTimeSec: DysonCostResources<number>;
 }
 
 export interface Actions {
   currentProductionsChange$: xs<DysonCostResources<number>>;
-  dysonCostRatiosChange$: xs<DysonCostResources<number>>;
+  currentAmountChange$: xs<DysonCostResources<number>>;
 }
 
 export function App(sources: Sources): Sinks {
-  const action$ = intent(sources.allResourceStreams, sources.dysonCosts.dysonSegmentCostRatios$);
-  const reducer$ = model(action$);
+  const actions = intent(
+    sources.allResourceStreams,
+  );
+  const reducer$ = model(actions, sources.dysonCosts);
   const vdom$ = view(sources.onion.state$);
 
   return {
@@ -47,7 +57,9 @@ export function App(sources: Sources): Sinks {
   };
 }
 
-function intent(allResourceStreams: AllResourceStreams, dysonCostRatios$: xs<DysonCostResources<number>>): Actions {
+function intent(
+  allResourceStreams: AllResourceStreams,
+): Actions {
   const currentProductionsChange$ = xs.combine(
       allResourceStreams.titanium.production$,
       allResourceStreams.gold.production$,
@@ -57,15 +69,24 @@ function intent(allResourceStreams: AllResourceStreams, dysonCostRatios$: xs<Dys
     )
     .map(([titanium, gold, silicon, meteorite, ice]) => ({ titanium, gold, silicon, meteorite, ice }));
 
-  const dysonCostRatiosChange$ = dysonCostRatios$;
+  const currentAmountChange$ = xs.combine(
+      allResourceStreams.titanium.amount$,
+      allResourceStreams.gold.amount$,
+      allResourceStreams.silicon.amount$,
+      allResourceStreams.meteorite.amount$,
+      allResourceStreams.ice.amount$,
+    )
+    .map(([titanium, gold, silicon, meteorite, ice]) => ({ titanium, gold, silicon, meteorite, ice }));
 
   return {
     currentProductionsChange$,
-    dysonCostRatiosChange$,
+    currentAmountChange$,
   };
 }
 
-function model(actions: Actions): Stream<Reducer> {
+function model(actions: Actions, dysonCosts: DysonCosts): Stream<Reducer> {
+  const dysonCostRatiosChange$ = dysonCosts.dysonSegmentCostRatios$;
+
   const currentProductionRatiosChange$ = actions.currentProductionsChange$
     .map(({ titanium, gold, silicon, meteorite, ice }) => {
       const [
@@ -80,35 +101,67 @@ function model(actions: Actions): Stream<Reducer> {
       };
     });
 
-
   const initReducer$ = xs.of<Reducer>((prev: State) => {
+    const initDysonCostResources = () => ({
+      titanium: 0,
+      gold: 0,
+      silicon: 0,
+      meteorite: 0,
+      ice: 0,
+    });
     const state: State = {
-      currentProductions: {
-        titanium: 0,
-        gold: 0,
-        silicon: 0,
-        meteorite: 0,
-        ice: 0,
-      },
-      currentProductionRatios: {
-        titanium: 0,
-        gold: 0,
-        silicon: 0,
-        meteorite: 0,
-        ice: 0,
-      },
-      dysonCostRatios: {
-        titanium: 0,
-        gold: 0,
-        silicon: 0,
-        meteorite: 0,
-        ice: 0,
+      currentProductions: initDysonCostResources(),
+      currentProductionRatios: initDysonCostResources(),
+      dysonCostRatios: initDysonCostResources(),
+      dysonContructions: {
+        ring: {
+          totalCost: initDysonCostResources(),
+          currentCost: initDysonCostResources(),
+          totalProduceTimeSec: initDysonCostResources(),
+          currentProduceTimeSec: initDysonCostResources(),
+        },
+        swarm: {
+          totalCost: initDysonCostResources(),
+          currentCost: initDysonCostResources(),
+          totalProduceTimeSec: initDysonCostResources(),
+          currentProduceTimeSec: initDysonCostResources(),
+        },
+        sphere: {
+          totalCost: initDysonCostResources(),
+          currentCost: initDysonCostResources(),
+          totalProduceTimeSec: initDysonCostResources(),
+          currentProduceTimeSec: initDysonCostResources(),
+        },
       },
     };
     return prev || state;
   });
 
-  const currentProductionsReducer$ = actions.currentProductionsChange$
+  const dysonRing$ = dysonContructionStateStream(
+    dysonCosts.constructions.ring,
+    actions.currentProductionsChange$,
+    actions.currentAmountChange$
+  );
+  const dysonSwarm$ = dysonContructionStateStream(
+    dysonCosts.constructions.swarm,
+    actions.currentProductionsChange$,
+    actions.currentAmountChange$
+  );
+  const dysonSphere$ = dysonContructionStateStream(
+    dysonCosts.constructions.sphere,
+    actions.currentProductionsChange$,
+    actions.currentAmountChange$
+  );
+
+  const dysonContructionsReducer$ = xs.combine(dysonRing$, dysonSwarm$, dysonSphere$)
+    .map(([ring, swarm, sphere]) => ({ ring, swarm, sphere }))
+    .map<Reducer>(mapStreamToReducer('dysonContructions'));
+
+  const worstProductionReducer$ = xs.combine(currentProductionRatiosChange$, dysonCostRatiosChange$)
+    .map(([curr, cost]) => getWorstProduction(curr, cost))
+    .map<Reducer>(mapStreamToReducer('worstProduction'));
+
+    const currentProductionsReducer$ = actions.currentProductionsChange$
     .map<Reducer>(currentProductions => prev => {
       return {
         ...prev,
@@ -124,19 +177,11 @@ function model(actions: Actions): Stream<Reducer> {
       };
     });
 
-  const dysonCostRatiosReducer$ = actions.dysonCostRatiosChange$
+  const dysonCostRatiosReducer$ = dysonCosts.dysonSegmentCostRatios$
     .map<Reducer>(dysonCostRatios => prev => {
       return {
         ...prev,
         dysonCostRatios: { ...dysonCostRatios },
-      };
-    });
-
-  const worstProductionReducer$ = xs.combine(currentProductionRatiosChange$, actions.dysonCostRatiosChange$)
-    .map<Reducer>(([curr, cost]) => prev => {
-      return {
-        ...prev,
-        worstProduction: getWorstProduction(curr, cost),
       };
     });
 
@@ -145,12 +190,56 @@ function model(actions: Actions): Stream<Reducer> {
     currentProductionsReducer$,
     currentDysonProductionReducer$,
     dysonCostRatiosReducer$,
-    worstProductionReducer$
+    worstProductionReducer$,
+    dysonContructionsReducer$,
   );
 }
 
+function dysonContructionStateStream(
+  constuctionCosts: DysonContructionCosts,
+  currentProductionsChange$: xs<DysonCostResources<number>>,
+  currentAmountChange$: xs<DysonCostResources<number>>,
+): xs<DysonContructionsState> {
+  const dysonRingTotalProduceTimeSec$ = xs.combine(
+      constuctionCosts.totalCost$,
+      currentProductionsChange$,
+    )
+    .map(([cost, production]) => {
+      return getProduceTimeSecForCost(cost, production);
+    });
+
+    const dysonRingCurrentProduceTimeSec$ = xs.combine(
+      constuctionCosts.currentCost$,
+      currentProductionsChange$,
+      currentAmountChange$,
+    )
+    .map(([cost, production, amount]) => {
+      return getProduceTimeSecForCost(cost, production, amount);
+    });
+
+  return xs.combine(
+      constuctionCosts.totalCost$,
+      constuctionCosts.currentCost$,
+      dysonRingTotalProduceTimeSec$,
+      dysonRingCurrentProduceTimeSec$,
+    )
+    .map(([
+      totalCost, currentCost, totalProduceTimeSec, currentProduceTimeSec,
+    ]) => ({
+      totalCost, currentCost, totalProduceTimeSec, currentProduceTimeSec,
+    }));
+}
+
+function mapStreamToReducer<TState extends {}>(key: keyof TState) {
+  return (value: {}) => (prev: TState) => Object.assign({}, prev, { [key]: value });
+}
+
 function view(state$: Stream<State>): Stream<VNode> {
-  return state$.map(({ currentProductions, currentProductionRatios, dysonCostRatios, worstProduction }) =>
+  return state$.map(({
+    currentProductions, currentProductionRatios,
+    dysonCostRatios, worstProduction,
+    dysonContructions,
+  }) =>
     <div>
       <h3 className="default btn-link">Dyson stats</h3>
       <div>
@@ -162,6 +251,30 @@ function view(state$: Stream<State>): Stream<VNode> {
       <div>
         Optimal ratios: { listRatios(dysonCostRatios) }
       </div>
+      <h3 className="default btn-link">Dyson current cost</h3>
+      {
+        ([
+          ['Ring', dysonContructions.ring],
+          ['Swarm', dysonContructions.swarm],
+          ['Sphere', dysonContructions.sphere]
+        ] as [string, DysonContructionsState][]).map(([name, costs]) => (
+          <div>
+            { name } cost: { listCosts(costs.currentCost, costs.currentProduceTimeSec) }
+          </div>
+        ))
+      }
+      <h3 className="default btn-link">Dyson total cost</h3>
+      {
+        ([
+          ['Ring', dysonContructions.ring],
+          ['Swarm', dysonContructions.swarm],
+          ['Sphere', dysonContructions.sphere]
+        ] as [string, DysonContructionsState][]).map(([name, costs]) => (
+          <div>
+            { name } cost: { listCosts(costs.totalCost, costs.totalProduceTimeSec) }
+          </div>
+        ))
+      }
     </div>
   );
 }
@@ -174,13 +287,29 @@ function getWorstProduction(curr: DysonCostResources<number>, optimal: DysonCost
     .reduce((state, pair) => state && (pair.val < state.val ? pair : state) || pair).key as ResourceType;
 }
 
-function listProductions(producions: DysonCostResources<number>) {
-  const keys = Object.keys(producions);
+function listCosts(costs: DysonCostResources<number>, produceTime?: DysonCostResources<number>) {
+  const keys = Object.keys(costs);
   return keys.map((type, i) => (
     <span>
       <span>
         { i > 0 ? ' ' : '' }
-        { format((producions as any)[type]) }/Sec { capitalizeFirstLetter(type) }
+        { format((costs as any)[type]) }
+        { produceTime && (produceTime as any)[type] && ` (${toHHMMSS((produceTime as any)[type])})` || '' }
+        { ' ' }
+        { capitalizeFirstLetter(type) }
+      </span>
+      { i < (keys.length - 1) ? ',' : '' }
+    </span>
+  ));
+}
+
+function listProductions(productions: DysonCostResources<number>) {
+  const keys = Object.keys(productions);
+  return keys.map((type, i) => (
+    <span>
+      <span>
+        { i > 0 ? ' ' : '' }
+        { format((productions as any)[type]) }/Sec { capitalizeFirstLetter(type) }
       </span>
       { i < (keys.length - 1) ? ',' : '' }
     </span>

@@ -57,6 +57,12 @@ export interface TechData {
   cost: Partial<AllResources<number>>;
 }
 
+export interface DysonContructions<T> {
+  ring: T;
+  swarm: T;
+  sphere: T;
+}
+
 export type TechType = 'unlockStorage' | 'unlockBasicEnergy' | 'unlockOil' | 'unlockSolar' |
   'unlockMachines' | 'unlockDestruction' | 'unlockSolarSystem' | 'unlockRocketFuelT2' | 'unlockRocketFuelT3' |
   'unlockLabT2' | 'unlockLabT3' | 'unlockLabT4' | 'unlockBatteries' | 'unlockBatteriesT2' | 'unlockBatteriesT3' |
