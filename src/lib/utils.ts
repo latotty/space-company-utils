@@ -6,7 +6,7 @@ export function toHHMMSS(sec_num: number) {
   return `${_(hours)}:${_(minutes)}:${_(seconds)}`;
 
   function _(num: number) {
-    return ('00' + num).slice(-2);
+    return ('00' + Math.floor(num)).slice(-2);
   }
 }
 
