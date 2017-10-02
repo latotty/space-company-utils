@@ -47,7 +47,7 @@ function initResourceProgressBar(type: ResourceType) {
       $progressBarDiv.style.width = `${value}%`;
     },
     error: (error) => console.error('getProgressBar', error),
-    complete: () => {},
+    complete: () => {/* noop */},
   });
 
   addCleanup(() => {

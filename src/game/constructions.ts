@@ -7,4 +7,4 @@ import { updateTimer$ } from '../lib/update-timer';
 export const dysonSectionsAmount$ = updateTimer$
   .map(() => getDysonAmount())
   .compose(dropRepeats())
-  .remember()
+  .remember();
